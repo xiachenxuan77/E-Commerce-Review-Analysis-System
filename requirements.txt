@@ -1,0 +1,4 @@
+pandas>=2.0
+vaderSentiment>=3.3.2
+transformers>=4.40.0   # only needed for --method distilbert
+torch>=2.0             # only needed for --method distilbert
