@@ -1,0 +1,17 @@
+{
+  "model_name": "roberta-base",
+  "metrics": {
+    "accuracy": 0.9390586911681981,
+    "macro_f1": 0.8875804666372233,
+    "weighted_f1": 0.9395548603170353
+  },
+  "best_params": {
+    "max_length": 128,
+    "learning_rate": 2e-05,
+    "batch_size": 16,
+    "epochs": 3,
+    "sample_size": null,
+    "loss_type": "weighted_ce",
+    "focal_gamma": 2.0
+  }
+}
