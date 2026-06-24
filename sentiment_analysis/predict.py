@@ -3,20 +3,21 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 
 BASE_DIR = Path(__file__).resolve().parent
-MODEL_PATH = BASE_DIR / "models" / "best_model"
+MODEL_ID = "InterestFox/transformer-RoBERTa_AIT203_NLP"
 ID_TO_LABEL = {0: "Negative", 1: "Neutral", 2: "Positive"}
 
 
-def predict_single_review(review_text: str, model_path: Path = MODEL_PATH) -> Dict[str, object]:
+def predict_single_review(review_text: str, model_path: Union[str, Path] = MODEL_ID) -> Dict[str, object]:
     import torch
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-    tokenizer = AutoTokenizer.from_pretrained(str(model_path))
-    model = AutoModelForSequenceClassification.from_pretrained(str(model_path))
+    model_source = str(model_path)
+    tokenizer = AutoTokenizer.from_pretrained(model_source)
+    model = AutoModelForSequenceClassification.from_pretrained(model_source)
     model.eval()
 
     inputs = tokenizer(review_text, return_tensors="pt", truncation=True, max_length=128)
@@ -29,7 +30,7 @@ def predict_single_review(review_text: str, model_path: Path = MODEL_PATH) -> Di
         "original_review": review_text,
         "predicted_sentiment": ID_TO_LABEL[pred_id],
         "confidence": round(float(probabilities[pred_id].item()), 4),
-        "model_name": "roberta-base",
+        "model_name": model_source,
     }
 
 
