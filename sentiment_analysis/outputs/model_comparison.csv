@@ -1,0 +1,2 @@
+model_name,accuracy,macro_f1,weighted_f1,neutral_f1,neutral_precision,neutral_recall,model_path
+roberta-base,0.9390586911681981,0.8875804666372233,0.9395548603170353,0.8184844331309967,0.8019953952417498,0.8356657337065174,D:\Code\AIT203 NLP\E-Commerce-Review-Analysis-System\sentiment_analysis\transformer_test\models\best_model
