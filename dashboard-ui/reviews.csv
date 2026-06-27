@@ -1,0 +1,11 @@
+review_id,original_review,rating,predicted_sentiment,confidence,aspects,aspect_sentiment,keywords,product_category
+1,The product quality is good but delivery was slow.,3,Neutral,0.78,Quality;Delivery,Quality:Positive;Delivery:Negative,quality;good;delivery;slow,Electronics
+2,Packaging was damaged and the seller did not reply.,1,Negative,0.91,Packaging;Customer Service,Packaging:Negative;Customer Service:Negative,packaging;damaged;seller;reply,Home
+3,Very useful product and worth the price.,5,Positive,0.94,Function;Price,Function:Positive;Price:Positive,useful;worth;price,Home
+4,The item arrived fast and works perfectly.,5,Positive,0.96,Delivery;Function,Delivery:Positive;Function:Positive,arrived;fast;works;perfectly,Electronics
+5,The price is expensive and the quality is poor.,2,Negative,0.89,Price;Quality,Price:Negative;Quality:Negative,price;expensive;quality;poor,Fashion
+6,The product is okay but the packaging could be better.,3,Neutral,0.72,Packaging;Quality,Packaging:Neutral;Quality:Neutral,okay;packaging;better,Beauty
+7,Customer service helped me quickly with the refund.,4,Positive,0.87,Customer Service,Customer Service:Positive,customer service;helped;quickly;refund,Home
+8,The box arrived broken and the product did not work.,1,Negative,0.93,Packaging;Function,Packaging:Negative;Function:Negative,box;broken;work,Electronics
+9,Good value for money and the material feels durable.,5,Positive,0.9,Price;Quality,Price:Positive;Quality:Positive,value;money;material;durable,Fashion
+10,Shipping was late and support ignored my message.,1,Negative,0.88,Delivery;Customer Service,Delivery:Negative;Customer Service:Negative,shipping;late;support;ignored,Electronics
