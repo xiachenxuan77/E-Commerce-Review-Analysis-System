@@ -99,115 +99,6 @@ def clean_text(text):
 
 
 
-# =========================
-# Custom Sentiment Lexicon
-# =========================
-
-positive_words = {
-    "good", "great", "excellent", "amazing",
-    "perfect", "love", "awesome", "fantastic",
-    "wonderful", "best", "nice", "happy"
-}
-
-negative_words = {
-    "bad", "terrible", "awful", "poor",
-    "hate", "worst", "disappointed",
-    "broken", "useless", "problem"
-}
-
-intensifiers = {
-    "very",
-    "really",
-    "extremely",
-    "super",
-    "fucking"
-}
-
-negations = {
-    "not",
-    "never",
-    "no",
-    "dont",
-    "didnt",
-    "isnt",
-    "wasnt",
-    "cant"
-}
-
-
-def semantic_score(text):
-
-    tokens = text.split()
-
-    score = 0
-
-    for i, word in enumerate(tokens):
-
-        if word in positive_words:
-
-            value = 1
-
-            if i > 0:
-
-                prev = tokens[i - 1]
-
-                if prev in intensifiers:
-                    value *= 1.5
-
-                if prev in negations:
-                    value *= -1
-
-            score += value
-
-        elif word in negative_words:
-
-            value = -1
-
-            if i > 0:
-
-                prev = tokens[i - 1]
-
-                if prev in intensifiers:
-                    value *= 1.5
-
-                if prev in negations:
-                    value *= -1
-
-            score += value
-
-    return score
-
-
-def rating_score(rating):
-
-    mapping = {
-        1: -2,
-        2: -1,
-        3: 0,
-        4: 1,
-        5: 2
-    }
-
-    return mapping.get(rating, 0)
-
-
-def generate_hybrid_label(rating, semantic):
-
-    hybrid_score = (
-        0.3 * rating_score(rating)
-        + 0.7 * semantic
-    )
-
-    if hybrid_score > 0.5:
-        return "Positive"
-
-    elif hybrid_score < -0.5:
-        return "Negative"
-
-    else:
-        return "Neutral"
-
-
 def main():
 
     # =========================
@@ -378,18 +269,9 @@ def main():
         .progress_apply(clean_text)
     )
 
-    df['semantic_score'] = (
-        df['cleaned_review'].apply(semantic_score))
+    df['true_sentimen'] = (
+        df['rating'].apply(sentiment_label))
     
-    df['hybrid_label'] = df.apply(
-        lambda row: generate_hybrid_label(
-            row['rating'],
-            row['semantic_score']
-        ),
-        axis=1
-    )
-
-
     # =========================
     # Review Length
     # =========================
