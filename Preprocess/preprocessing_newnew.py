@@ -230,15 +230,7 @@ def main():
     print(f"Remaining Reviews: {after}")
 
     
-    # =========================
-    # Review Length
-    # =========================
 
-    df['review_length'] = (
-        df['cleaned_review']
-        .str.split()
-        .str.len()
-    )
 
     # =========================
     # Generate Initial Sentiment Labels
@@ -264,8 +256,7 @@ def main():
             n_samples = round(len(group) / len(df) * TARGET_SIZE)
  
             sampled_group = group.sample(
-                n=n_samples,
-                random_state=42)
+                n=n_samples)
 
             sampled_df.append(sampled_group)
 
@@ -279,17 +270,6 @@ def main():
             random_state=42
         ).reset_index(drop=True)
 
-        elif len(df) < TARGET_SIZE:
-
-        extra = TARGET_SIZE - len(df)
-
-        remaining = df.sample(
-        n=extra,
-        replace=True,
-        random_state=42
-        )
-
-        df = pd.concat([df, remaining]).reset_index(drop=True)
 
         print("\nAfter Stratified Sampling:")
         print(df.shape)
@@ -302,6 +282,16 @@ def main():
         print("\nDataset contains fewer than 80,000 reviews.")
 
     # =========================
+    # Review Length
+    # =========================
+
+    df['review_length'] = (
+        df['cleaned_review']
+        .str.split()
+        .str.len()
+    )
+
+    # =========================
     # Rename Columns
     # =========================
 
@@ -312,18 +302,8 @@ def main():
             'reviewTime': 'review_time'
         }
     )
-
-    # =========================
-    # Add Review ID
-    # =========================
-
+    # Reset DataFrame Index
     df = df.reset_index(drop=True)
-
-    df.insert(
-        0,
-        'review_id',
-        range(1, len(df) + 1)
-    )
 
     # =========================
     # Final Dataset
@@ -331,7 +311,6 @@ def main():
 
     final_df = df[
     [
-        'review_id',
         'original_review',
         'cleaned_review',
         'rating',
