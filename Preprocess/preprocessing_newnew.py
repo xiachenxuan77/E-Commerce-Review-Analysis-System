@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-
 # =========================
 # Data Processing
 # =========================
 
 import pandas as pd
-import numpy as np
 
 # NLP
 import nltk
@@ -53,7 +50,6 @@ negation_words = {
 }
 
 stop_words = stop_words - negation_words
-negations = negation_words
 
 lemmatizer = WordNetLemmatizer()
 
@@ -196,15 +192,17 @@ def main():
     print("\nDuplicates Removed:", before - after)
     print("Remaining Reviews:", after)
 
-    df.to_csv(
-        "clean_reviews_stage1.csv",
-        index=False
-    )
+    # =========================
+    # Generate Initial Sentiment Labels
+    # =========================
 
+    df["sentiment_label"] = df["rating"].apply(sentiment_label)
 
+    print("\nInitial Sentiment Distribution:")
+    print(df["sentiment_label"].value_counts())
 
     # =========================
-    # Stratified Sampling (80k by Product Category)
+    # Stratified Sampling (80k by Sentiment Label)
     # =========================
 
     TARGET_SIZE = 80000
@@ -214,37 +212,21 @@ def main():
         sample_fraction = TARGET_SIZE / len(df)
 
         df = (
-        df.groupby("category", group_keys=False)
+        df.groupby("sentiment_label", group_keys=False)
           .sample(frac=sample_fraction, random_state=42)
-          .reset_index(drop=True)
-    )
+          .reset_index(drop=True))
 
         print("\nAfter Stratified Sampling (80k):")
         print(df.shape)
 
-        print("\nCategory Distribution After Sampling:")
-        print(df["category"].value_counts(normalize=True))
+        print("\nSentiment Distribution After Sampling:")
+        print(df["sentiment_label"].value_counts(normalize=True))
 
     else:
 
         print("\nDataset contains fewer than 80,000 reviews.")
         print("No sampling performed.")
 
-
-
-
-
-    # =========================
-    # Generate Sentiment Labels
-    # =========================
-
-    df['true_sentiment'] = (
-        df['rating']
-        .apply(sentiment_label)
-    )
-
-    print("\nSentiment Distribution:")
-    print(df['true_sentiment'].value_counts())
 
     # =========================
     # Sample Cleaning Demo
@@ -268,9 +250,13 @@ def main():
         df['reviewText']
         .progress_apply(clean_text)
     )
+    before = len(df)
 
-    df['true_sentimen'] = (
-        df['rating'].apply(sentiment_label))
+    df = df[df["cleaned_review"].str.strip() != ""].copy()
+
+    after = len(df)
+
+    print(f"\nRemoved {before-after} empty cleaned reviews.")
     
     # =========================
     # Review Length
@@ -316,9 +302,7 @@ def main():
         'original_review',
         'cleaned_review',
         'rating',
-        'true_sentiment',
-        'semantic_score',
-        'hybrid_label',
+        'sentiment_label',
         'product_category',
         'brand',
         'review_length',
@@ -339,19 +323,19 @@ def main():
     total_reviews = len(final_df)
 
     positive_reviews = (
-        final_df['hybrid_label']
+        final_df['sentiment_label']
         .eq('Positive')
         .sum()
     )
 
     neutral_reviews = (
-        final_df['hybrid_label']
+        final_df['sentiment_label']
         .eq('Neutral')
         .sum()
     )
 
     negative_reviews = (
-        final_df['hybrid_label']
+        final_df['sentiment_label']
         .eq('Negative')
         .sum()
     )
@@ -381,10 +365,9 @@ def main():
     print(f"Number of Brands: {num_brands}")
     print("Train/Test Split Ratio: 80:20")
 
-    # =========================
-    # Remove Empty Reviews
-    # (same logic as sentiment analysis)
-    # =========================
+    # Remove Reviews with Empty Text
+    # Original review is used first (RoBERTa),
+    # cleaned review is used as a fallback.
 
     def normalize_text(text):
 
