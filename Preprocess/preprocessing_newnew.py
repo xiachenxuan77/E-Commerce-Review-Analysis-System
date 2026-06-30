@@ -192,40 +192,6 @@ def main():
     print("\nDuplicates Removed:", before - after)
     print("Remaining Reviews:", after)
 
-    # =========================
-    # Generate Initial Sentiment Labels
-    # =========================
-
-    df["sentiment_label"] = df["rating"].apply(sentiment_label)
-
-    print("\nInitial Sentiment Distribution:")
-    print(df["sentiment_label"].value_counts())
-
-    # =========================
-    # Stratified Sampling (80k by Sentiment Label)
-    # =========================
-
-    TARGET_SIZE = 80000
-
-    if len(df) > TARGET_SIZE:
-
-        sample_fraction = TARGET_SIZE / len(df)
-
-        df = (
-        df.groupby("sentiment_label", group_keys=False)
-          .sample(frac=sample_fraction, random_state=42)
-          .reset_index(drop=True))
-
-        print("\nAfter Stratified Sampling (80k):")
-        print(df.shape)
-
-        print("\nSentiment Distribution After Sampling:")
-        print(df["sentiment_label"].value_counts(normalize=True))
-
-    else:
-
-        print("\nDataset contains fewer than 80,000 reviews.")
-        print("No sampling performed.")
 
 
     # =========================
@@ -250,6 +216,20 @@ def main():
         df['reviewText']
         .progress_apply(clean_text)
     )
+    # =========================
+    # Remove Empty Cleaned Reviews
+    # =========================
+
+    before = len(df)
+
+    df = df[df["cleaned_review"].str.strip() != ""].copy()
+
+    after = len(df)
+
+    print(f"\nRemoved {before - after} empty cleaned reviews.")
+    print(f"Remaining Reviews: {after}")
+
+    
     before = len(df)
 
     df = df[df["cleaned_review"].str.strip() != ""].copy()
@@ -267,6 +247,55 @@ def main():
         .str.split()
         .str.len()
     )
+
+    # =========================
+    # Generate Initial Sentiment Labels
+    # =========================
+
+    df["sentiment_label"] = df["rating"].apply(sentiment_label)
+
+    print("\nInitial Sentiment Distribution:")
+    print(df["sentiment_label"].value_counts())
+
+    # =========================
+    # Stratified Sampling (80k)
+    # =========================
+
+    TARGET_SIZE = 80000
+
+    if len(df) > TARGET_SIZE:
+
+        sampled_df = []
+
+        for label, group in df.groupby("sentiment_label"):
+
+            n_samples = round(len(group) / len(df) * TARGET_SIZE)
+ 
+            sampled_group = group.sample(
+                n=n_samples,
+                random_state=42)
+
+            sampled_df.append(sampled_group)
+
+        df = (
+            pd.concat(sampled_df).sample(frac=1, random_state=42).reset_index(drop=True))
+
+
+        if len(df) > TARGET_SIZE:
+            df = df.sample(
+            n=TARGET_SIZE,
+            random_state=42
+        ).reset_index(drop=True)
+
+        print("\nAfter Stratified Sampling:")
+        print(df.shape)
+
+        print("\nSentiment Distribution:")
+        print(df["sentiment_label"].value_counts(normalize=True))
+
+    else:
+
+        print("\nDataset contains fewer than 80,000 reviews.")
 
     # =========================
     # Rename Columns
