@@ -230,14 +230,6 @@ def main():
     print(f"Remaining Reviews: {after}")
 
     
-    before = len(df)
-
-    df = df[df["cleaned_review"].str.strip() != ""].copy()
-
-    after = len(df)
-
-    print(f"\nRemoved {before-after} empty cleaned reviews.")
-    
     # =========================
     # Review Length
     # =========================
@@ -286,6 +278,18 @@ def main():
             n=TARGET_SIZE,
             random_state=42
         ).reset_index(drop=True)
+
+        elif len(df) < TARGET_SIZE:
+
+        extra = TARGET_SIZE - len(df)
+
+        remaining = df.sample(
+        n=extra,
+        replace=True,
+        random_state=42
+        )
+
+        df = pd.concat([df, remaining]).reset_index(drop=True)
 
         print("\nAfter Stratified Sampling:")
         print(df.shape)
