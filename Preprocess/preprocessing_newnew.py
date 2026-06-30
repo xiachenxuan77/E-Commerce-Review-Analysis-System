@@ -105,6 +105,8 @@ def main():
         "amazon_reviews.csv",
         engine="python"
     )
+    # Generate review_id
+    df.insert(0, "review_id", range(1, len(df) + 1))
 
     print("Dataset Shape:")
     print(df.shape)
@@ -153,6 +155,7 @@ def main():
 
     df = df[
         [
+            'review_id',
             'reviewText',
             'rating',
             'category',
@@ -249,33 +252,40 @@ def main():
 
     if len(df) > TARGET_SIZE:
 
+        class_counts = df["sentiment_label"].value_counts().sort_index()
+
+        expected = class_counts / len(df) * TARGET_SIZE
+
+        sample_counts = expected.astype(int)
+
+        remainder = TARGET_SIZE - sample_counts.sum()
+
+        decimal = expected - sample_counts
+
+        for label in decimal.sort_values(ascending=False).index[:remainder]:
+            sample_counts[label] += 1
+
         sampled_df = []
 
-        for label, group in df.groupby("sentiment_label"):
+        for label, n in sample_counts.items():
 
-            n_samples = round(len(group) / len(df) * TARGET_SIZE)
- 
-            sampled_group = group.sample(
-                n=n_samples)
-
-            sampled_df.append(sampled_group)
+            sampled_df.append(
+            df[df["sentiment_label"] == label].sample(
+                n=n
+            )
+        )
 
         df = (
-            pd.concat(sampled_df).sample(frac=1, random_state=42).reset_index(drop=True))
-
-
-        if len(df) > TARGET_SIZE:
-            df = df.sample(
-            n=TARGET_SIZE,
-            random_state=42
-        ).reset_index(drop=True)
-
+            pd.concat(sampled_df)
+              .sample(frac=1, random_state=42)
+              .reset_index(drop=True)
+    )
 
         print("\nAfter Stratified Sampling:")
         print(df.shape)
 
         print("\nSentiment Distribution:")
-        print(df["sentiment_label"].value_counts(normalize=True))
+        print(df["sentiment_label"].value_counts())
 
     else:
 
@@ -311,6 +321,7 @@ def main():
 
     final_df = df[
     [
+        'review_id',
         'original_review',
         'cleaned_review',
         'rating',
