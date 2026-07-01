@@ -1,3 +1,6 @@
+# Dataset:
+# https://www.kaggle.com/datasets/rogate16/amazon-reviews-2018-full-dataset
+
 # =========================
 # Data Processing
 # =========================
